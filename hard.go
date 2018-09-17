@@ -8,6 +8,7 @@ func one() {
 	var a, b uint8 = 4, 4
 	var c, d uint8 = 12, 12
 	var e, f uint8 = 10, 3
+    fmt.Println(add(a,b))
 	if add(a, b) != uint8(8) {
 		fmt.Println("no dice for ab")
 	} else if add(c, d) != uint8(24) {
@@ -19,7 +20,7 @@ func one() {
 	}
 }
 func add(a, b uint8) (r uint8) {
-	var carry uint8
+	var carry uint8 = uint8(1)
 	var i uint8
 	for i = 0; i < oneBits; i++ {
 		var mask uint8 = ^uint8(0) >> 7 << i
@@ -28,17 +29,20 @@ func add(a, b uint8) (r uint8) {
 			r = r | at | bt
 		} else if at&mask == mask && bt&mask == mask {
 			// both one
-			carry++
-		} else if carry > 0 {
+            carry = carry << 1
+            r = r & ^mask
+		} else if carry > 1 {
 			// when carried, how does that manifest?
 			// what happens to carried bits when you have an xor == 1 or both are 1?
 			if at&bt == 0 {
 				// set the bits
-				r = r | mask
-				for j := carry-1; j > 0; j-- {
-					r = r | (mask >> j)
-				}
-			    carry = 0
+                t := mask
+                for carry != uint8(1) {
+                    carry = carry >> 1
+                    r = r | t
+                    t = t >> 1
+                }
+			    carry = uint8(1)
 			}
 		}
 	}
