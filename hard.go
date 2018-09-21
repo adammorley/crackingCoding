@@ -1,8 +1,12 @@
 package main
 
-import "fmt"
-import "math/rand"
-import "time"
+import (
+	"fmt"
+	"math/rand"
+    "strconv"
+	"strings"
+	"time"
+)
 
 const oneBits = uint8(8)
 
@@ -51,6 +55,77 @@ func add(a, b uint8) (r uint8) {
 	return
 }
 
+func two() {
+	fullDeck := newDeck()
+    fullDeck.shuffle()
+	for _, c := range fullDeck {
+		fmt.Println(c)
+	}
+}
+
+type deck []card
+type card struct {
+	suit int
+	val  int
+}
+
+const (
+	_     = iota
+	Clubs = iota
+	Diamonds
+	Hearts
+	Spades
+)
+const numberOfSuits = 4
+const lowValue = 2
+const faceValue = 11
+const highValue = 14
+
+func newDeck() deck {
+	suits := [numberOfSuits]int{Clubs, Diamonds, Hearts, Spades}
+	full := []card{}
+	for _, suit := range suits {
+		for i := lowValue; i <= highValue; i++ {
+			full = append(full, card{suit: suit, val: i})
+		}
+	}
+	return full
+}
+func (c card) lookupSuit() string {
+	suits := map[int]string{1: "clubs", 2: "diamonds", 3: "hearts", 4: "spades"}
+	return suits[c.suit]
+}
+func (c card) lookupFaceValue() string {
+	faceValues := map[int]string{faceValue: "jack", 12: "queen", 13: "king", highValue: "ace"}
+	if c.val < lowValue {
+		panic("cards start at 2")
+	} else if c.val < faceValue {
+		return strconv.Itoa(c.val)
+	} else if c.val <= highValue {
+		return faceValues[c.val]
+	} else {
+		panic("cards stop at 14")
+	}
+}
+func (c card) String() string {
+	var sb strings.Builder
+	sb.WriteString(c.lookupFaceValue())
+	sb.WriteString(" of ")
+	sb.WriteString(c.lookupSuit())
+	return sb.String()
+}
+func (d deck) swap(i, j int) {
+    d[i], d[j] = d[j],d[i]
+}
+func (d deck) randomCardIndex() int {
+    return rand.Intn(len(d))
+}
+func (d deck) shuffle() {
+    for i:=0;i<len(d);i++{
+        d.swap(i, d.randomCardIndex())
+    }
+}
+
 // 15 mins; 17.3 in cracking coding
 func three() {
 	var a []int = []int{5, 16, 2, 9, 22}
@@ -78,10 +153,10 @@ func six() {
 	if countTwos(25) != 9 {
 		fmt.Println("boo")
 	} else if countTwos(250) != 106 {
-        fmt.Println("boo")
-    } else {
-        fmt.Println("got", countTwos(25), countTwos(250))
-    }
+		fmt.Println("boo")
+	} else {
+		fmt.Println("got", countTwos(25), countTwos(250))
+	}
 }
 func countTwos(n int) (r int) {
 	for i := 0; i <= n; i++ {
@@ -92,7 +167,7 @@ func countTwos(n int) (r int) {
 			}
 			j = j / 10
 		}
-	    r += c
+		r += c
 	}
 	return
 }
@@ -100,6 +175,7 @@ func countTwos(n int) (r int) {
 func main() {
 	fmt.Println("hello")
 	one()
+	two()
 	three()
 	six()
 }
