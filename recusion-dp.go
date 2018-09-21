@@ -1,9 +1,10 @@
 package main
 
 import (
+	"container/list"
 	"errors"
 	"fmt"
-    "strings"
+	"strings"
 )
 
 func one() {
@@ -47,44 +48,44 @@ func countRec(n int) int {
 
 type point struct{ r, c int }
 type path map[point]bool
-type grid [][]bool
+type grid map[point]bool
 
 func two() {
-	var size int = 4
-	var p0 *path = new(path)
-	*p0 = make(path)
-	var p1 *path = new(path)
-	*p1 = make(path)
-	var p2 *path = new(path)
-	*p2 = make(path)
-	var g0 [][]bool = make([][]bool, size)
-	var g1 [][]bool = make([][]bool, size)
-	var g2 [][]bool = make([][]bool, size)
-	for i := 0; i < size; i++ {
-		g0[i] = make([]bool, size)
-		g1[i] = make([]bool, size)
-		g2[i] = make([]bool, size)
+	var g grid = make(map[point]bool)
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			g[point{i, j}] = true
+		}
 	}
-	g0[1][3] = true
-	g0[3][1] = true
-	g2[0][3] = true
-	g2[1][2] = true
-	g2[2][1] = true
-	g2[3][0] = true
-	fmt.Println(findRoute(g0, 0, 0, p0), p0)
-	fmt.Println(findRoute(g1, 0, 0, p1), p1)
-	fmt.Println(findRoute(g2, 0, 0, p2), p2)
+	g[point{3, 1}] = false
+	g[point{1, 2}] = false
+	var goal point = point{3, 3}
+	var robot point = point{0, 0}
+	var p path = make(path)
+	p[goal] = true
+	p = findPath(g, goal, robot, p)
+	fmt.Println(p)
 }
 
-func findRoute(g grid, r, c int, p *path) bool {
-	if c > 3 || r > 3 || g[r][c] {
-		return false
+func findPath(g grid, current point, destination point, p path) path {
+	if destination == current {
+		p[current] = true
+		return p
 	}
-	if r == 3 && c == 3 || findRoute(g, r+1, c, p) || findRoute(g, r, c+1, p) {
-		(*p)[point{r, c}] = true
-		return true
+	var mu point = point{current.r - 1, current.c}
+	var ml point = point{current.r, current.c - 1}
+	muv, muok := g[mu]
+	mlv, mlok := g[ml]
+	if mlv && mlok {
+		p[ml] = true
+		return findPath(g, ml, destination, p)
+	} else if muv && muok {
+		p[mu] = true
+		return findPath(g, mu, destination, p)
+	} else {
+		fmt.Println(g, mu, ml, current, destination, p)
+		panic("oops")
 	}
-	return false
 }
 
 func three() {
@@ -128,66 +129,130 @@ func midpoint(A []int) int {
 }
 
 func four() {
-    a0 := []int{0}
-    a1 := []int{0,1}
-    a2 := []int{0,1,2}
-    a3 := []int{0,1,2,3}
-    fmt.Println(subset(a0))
-    fmt.Println(subset(a1))
-    fmt.Println(subset(a2))
-    fmt.Println(subset(a3))
+	a0 := []int{0}
+	a1 := []int{0, 1}
+	a2 := []int{0, 1, 2}
+	a3 := []int{0, 1, 2, 3}
+	fmt.Println(subset(a0))
+	fmt.Println(subset(a1))
+	fmt.Println(subset(a2))
+	fmt.Println(subset(a3))
 }
 
 func subset(a []int) (r [][]int) {
-    r = make([][]int, 0)
-    for i := 0; i < len(a); i++ {
-        for j := i+1; j <= len(a); j++ {
-            r = append(r, a[i:j])
-        }
-    }
-    return
+	r = make([][]int, 0)
+	for i := 0; i < len(a); i++ {
+		for j := i + 1; j <= len(a); j++ {
+			r = append(r, a[i:j])
+		}
+	}
+	return
 }
 
 func seven() {
-    var s string = "abcdefghi"
-    fmt.Println(stringSubset(s))
+	var s string = "abcdefghi"
+	fmt.Println(stringSubset(s))
 }
 
 func stringSubset(a string) (r []string) {
-    r = make([]string, 0)
-    for i := 0; i < len(a); i++ {
-        for j := i+1; j <= len(a); j++ {
-            r = append(r, a[i:j])
-        }
-    }
-    return
+	r = make([]string, 0)
+	for i := 0; i < len(a); i++ {
+		for j := i + 1; j <= len(a); j++ {
+			r = append(r, a[i:j])
+		}
+	}
+	return
 }
 
 func eight() {
-    var s string = "aabcdeffghi"
-    var d string = removeDup(s)
-    fmt.Println(stringSubset(d))
+	var s string = "aabcdeffghi"
+	var d string = removeDup(s)
+	fmt.Println(stringSubset(d))
 }
 
 func removeDup(s string) (r string) {
-    var m map[byte]bool = make(map[byte]bool)
-    var sb strings.Builder
-    var b byte
-    for i := range s {
-        b = byte(s[i])
-        if _, ok := m[b]; !ok {
-            m[b] = true
-            sb.WriteByte(b)
-        }
-    }
-    return sb.String()
+	var m map[byte]bool = make(map[byte]bool)
+	var sb strings.Builder
+	var b byte
+	for i := range s {
+		b = byte(s[i])
+		if _, ok := m[b]; !ok {
+			m[b] = true
+			sb.WriteByte(b)
+		}
+	}
+	return sb.String()
+}
+
+func eleven() {
+	fmt.Println(change(21, [4]int{25, 10, 5, 1}, 0))
+}
+func change(v int, cs [4]int, i int) (n int) {
+	if i == len(cs) {
+		return 1
+	}
+	c := cs[i]
+	for j := 0; j*c <= v; j++ {
+		n += change(v-j*c, cs, i+1)
+	}
+	return
+}
+
+func twelve() {
+	//gobuild()
+}
+
+const rowCount = int(8)
+
+func gobuild() {
+	var s [rowCount]int
+	l := list.New()
+	placeQueen(0, s, l)
+	e := l.Front()
+	for e != nil {
+		fmt.Println(e.Value.([rowCount]int))
+		e = e.Next()
+	}
+}
+func placeQueen(r int, s [rowCount]int, l *list.List) {
+	if r == rowCount {
+		l.PushBack(s)
+	} else {
+		for c := 0; c < rowCount; c++ {
+			if validForQueen(r, c, s) {
+				s[r] = c
+				placeQueen(r+1, s, l)
+			}
+		}
+	}
+}
+func abs(a int) int {
+	if a < 0 {
+		return a * -1
+	}
+	return a
+}
+func validForQueen(r, c int, s [rowCount]int) bool {
+	for i := 0; i < r; i++ {
+		if s[i] == c {
+			return false
+		}
+		if abs(r-i) == abs(c-s[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 func main() {
-	one()   // success
-	two()   // fail w/o help (two-dimensional)
-	three() // success
-    four() // did without recursion by noticing iterative pattern
-    seven()
-    eight()
+	//one()   // success
+	//two()   // success
+	//three() // success
+	//four()  // did without recursion by noticing iterative pattern
+	//five() // see github towerOfHanoi
+	//seven()
+	//eight()
+	eleven()
+	//twelve() // see github nQueens
+	twelve()
 }
