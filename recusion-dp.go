@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
+    "log"
 	"strings"
 )
 
@@ -89,43 +90,46 @@ func findPath(g grid, current point, destination point, p path) path {
 }
 
 func three() {
-	var a0, a1, a2 []int = []int{1, 5, 8, 9}, []int{-12, -3, 44, 27}, []int{-4, 0, 2, 8, 9}
-	v, e := findMagic(a0)
-	fmt.Println(v, e)
-	v, e = findMagic(a1)
-	fmt.Println(v, e)
-	v, e = findMagic(a2)
-	fmt.Println(v, e)
+    run([]int{-4, -2, 1, 3, 5, 7}, 3, true)
+    run([]int{-16, -4, -2, -1, 1}, 0, false)
+	run([]int{-16, -4, -3, 1, 4, 17}, 4, true)
+    run([]int{-16, -4, 4, 20, 27}, 0, false)
+    run([]int{1, 5, 8, 9}, 0, false)
+    run([]int{-12,-3, 44, 27}, 0, false)
+    run([]int{-4, 0, 2, 8, 9}, 2, true)
 }
-
-func findMagic(A []int) (int, error) {
-	if len(A) == 0 {
-		return 0, errors.New("did not find it")
-	}
-
-	i := midpoint(A)
-	if A[i] == i {
-		return A[i], nil
-	} else if A[i] > i {
-		A = A[:i]
-		return findMagic(A)
-	} else if A[i] < i {
-		A = A[i+1:]
-		return findMagic(A)
+func run(a []int, e int, b bool) {
+    r, i := findMagicIndex(a)
+    if r != b || e != i {
+        log.Fatal("wrong values ", r, b, e, i, a)
+    }
+}
+func findMagicIndex(a []int) (bool, int) {
+    s, e := 0, len(a)-1
+	i, err := findMagic(a, s, e)
+	if err != nil {
+        return false, 0
 	} else {
-		panic("this should not happen")
+        return true, i
 	}
-
-	/*for i := 0; i < len(A); i++ {
-		if i == A[i] {
-			return i, nil
-		}
-	}
-	return 0, errors.New("didn't find it") //XXX update to have typed error*/
 }
-
-func midpoint(A []int) int {
-	return len(A) / 2
+func findMagic(a []int, s, e int) (int, error) {
+    m := midpoint(s, e)
+    if e < s {
+		return 0, errors.New("no value found")
+    } else if m == a[m] {
+		return m, nil
+	} else if m < a[m] {
+		return findMagic(a, s, m-1)
+	} else if m > a[m] {
+		return findMagic(a, m+1,e)
+	} else {
+		log.Fatal("problem ", a, m)
+        return 0, errors.New("fatal")
+	}
+}
+func midpoint(s, e int) int {
+    return (e-s)/2+s
 }
 
 func four() {
@@ -247,7 +251,7 @@ func validForQueen(r, c int, s [rowCount]int) bool {
 func main() {
 	//one()   // success
 	//two()   // success
-	//three() // success
+	three() // success
 	//four()  // did without recursion by noticing iterative pattern
 	//five() // see github towerOfHanoi
 	//seven()
