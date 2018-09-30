@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bufio"
+	"errors"
 	"fmt"
+	"math"
 	"math/rand"
-    "strconv"
+	"os"
+    "sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -57,7 +62,7 @@ func add(a, b uint8) (r uint8) {
 
 func two() {
 	fullDeck := newDeck()
-    fullDeck.shuffle()
+	fullDeck.shuffle()
 	for _, c := range fullDeck {
 		fmt.Println(c)
 	}
@@ -115,15 +120,15 @@ func (c card) String() string {
 	return sb.String()
 }
 func (d deck) swap(i, j int) {
-    d[i], d[j] = d[j],d[i]
+	d[i], d[j] = d[j], d[i]
 }
 func (d deck) randomCardIndex() int {
-    return rand.Intn(len(d))
+	return rand.Intn(len(d))
 }
 func (d deck) shuffle() {
-    for i:=0;i<len(d);i++{
-        d.swap(i, d.randomCardIndex())
-    }
+	for i := 0; i < len(d); i++ {
+		d.swap(i, d.randomCardIndex())
+	}
 }
 
 // 15 mins; 17.3 in cracking coding
@@ -149,6 +154,41 @@ func randSet(v []int, n int) (r []int) {
 	return
 }
 
+const numBits = uint8(8)
+
+func makeBits(j int8) int8 {
+	return ^0 >> (numBits - 1) << uint8(j)
+}
+
+type arr []int8
+
+func (a arr) fetch(j int8, i int) int8 {
+	n := a[i]
+	and := makeBits(j)
+	n = n & and
+	return n
+}
+func four() {
+	var i, n int8 = 0, 8
+	var total int8
+	for i = 0; i <= n; i++ {
+		total += i
+	}
+	var a arr = arr{0, 1, 2, 3, 4, 5, 7, 8}
+	var stored int8
+	for i := 0; i < len(a); i++ {
+		var temp int8
+		var j int8
+		for j = 0; j < int8(numBits); j++ {
+			bitState := a.fetch(j, i)
+			temp = temp | bitState
+		}
+		stored += temp
+	}
+	val := total - stored
+	fmt.Println(val)
+}
+
 func six() {
 	if countTwos(25) != 9 {
 		fmt.Println("boo")
@@ -172,10 +212,93 @@ func countTwos(n int) (r int) {
 	return
 }
 
+type pair struct {
+	val, cnt int
+}
+
+func ten() {
+	a := []int{1, 2, 5, 9, 5, 9, 5, 5, 5}
+	m := map[int]int{}
+	for i := 0; i < len(a); i++ {
+		m[a[i]]++
+	}
+	s := []pair{}
+	for k, v := range m {
+		s = append(s, pair{val: k, cnt: v})
+	}
+	sort.Slice(s, func(i, j int) bool { return s[i].cnt > s[j].cnt })
+	if s[0].cnt > len(a)/2 {
+		fmt.Println(s[0].val)
+	}
+}
+
+type locations map[int]bool
+type distance map[string]locations
+func eleven() {
+	f, e := os.Open("file")
+	if e != nil {
+		panic(e)
+	}
+	d := parseFile(f)
+	r, e := d.calc("is", "cats")
+	fmt.Println(e)
+	r, e = d.calc("is", "this")
+	fmt.Println(r)
+
+}
+func parseFile(f *os.File) (d distance) {
+	d = make(distance)
+	scanner := bufio.NewScanner(f)
+	scanner.Split(bufio.ScanWords)
+	c := 1
+	for scanner.Scan() {
+		word := scanner.Text()
+		if _, ok := d[word]; !ok {
+			d[word] = make(map[int]bool)
+		}
+		d[word][c] = true
+		c++
+	}
+	return
+}
+func (d distance) calc(w0, w1 string) (int, error) {
+	i, ok := d[w0]
+	if !ok {
+		return 0, errors.New(fmt.Sprintf("cannot find %v\n", w0))
+	}
+	j, ok := d[w1]
+	if !ok {
+		return 0, errors.New(fmt.Sprintf("cannot find %v\n", w1))
+	}
+	r := int(math.MaxInt64)
+	found := false
+	for w0d, _ := range i {
+		for w1d, _ := range j {
+			if abs(w0d-w1d) < r {
+				r = abs(w0d - w1d)
+				found = true
+			}
+		}
+	}
+	if !found {
+		return 0, errors.New("did not find match")
+	}
+	return r, nil
+}
+func abs(n int) int {
+	if n < 0 {
+		return n * -1
+	}
+	return n
+}
+
 func main() {
 	fmt.Println("hello")
-	one()
-	two()
-	three()
-	six()
+	//one()
+	//two()
+	//three()
+	four()
+	//six()
+	ten()
+	eleven()
 }
