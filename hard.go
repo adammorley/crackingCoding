@@ -7,7 +7,7 @@ import (
 	"math"
 	"math/rand"
 	"os"
-    "sort"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -234,6 +234,7 @@ func ten() {
 
 type locations map[int]bool
 type distance map[string]locations
+
 func eleven() {
 	f, e := os.Open("file")
 	if e != nil {
@@ -292,6 +293,9 @@ func abs(n int) int {
 	return n
 }
 
+func sixteen() {
+}
+
 func main() {
 	fmt.Println("hello")
 	//one()
@@ -301,4 +305,5 @@ func main() {
 	//six()
 	ten()
 	eleven()
+	sixteen()
 }

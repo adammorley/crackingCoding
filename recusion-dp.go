@@ -4,7 +4,8 @@ import (
 	"container/list"
 	"errors"
 	"fmt"
-    "log"
+	"log"
+	"sort"
 	"strings"
 )
 
@@ -90,46 +91,46 @@ func findPath(g grid, current point, destination point, p path) path {
 }
 
 func three() {
-    run([]int{-4, -2, 1, 3, 5, 7}, 3, true)
-    run([]int{-16, -4, -2, -1, 1}, 0, false)
+	run([]int{-4, -2, 1, 3, 5, 7}, 3, true)
+	run([]int{-16, -4, -2, -1, 1}, 0, false)
 	run([]int{-16, -4, -3, 1, 4, 17}, 4, true)
-    run([]int{-16, -4, 4, 20, 27}, 0, false)
-    run([]int{1, 5, 8, 9}, 0, false)
-    run([]int{-12,-3, 44, 27}, 0, false)
-    run([]int{-4, 0, 2, 8, 9}, 2, true)
+	run([]int{-16, -4, 4, 20, 27}, 0, false)
+	run([]int{1, 5, 8, 9}, 0, false)
+	run([]int{-12, -3, 44, 27}, 0, false)
+	run([]int{-4, 0, 2, 8, 9}, 2, true)
 }
 func run(a []int, e int, b bool) {
-    r, i := findMagicIndex(a)
-    if r != b || e != i {
-        log.Fatal("wrong values ", r, b, e, i, a)
-    }
+	r, i := findMagicIndex(a)
+	if r != b || e != i {
+		log.Fatal("wrong values ", r, b, e, i, a)
+	}
 }
 func findMagicIndex(a []int) (bool, int) {
-    s, e := 0, len(a)-1
+	s, e := 0, len(a)-1
 	i, err := findMagic(a, s, e)
 	if err != nil {
-        return false, 0
+		return false, 0
 	} else {
-        return true, i
+		return true, i
 	}
 }
 func findMagic(a []int, s, e int) (int, error) {
-    m := midpoint(s, e)
-    if e < s {
+	m := midpoint(s, e)
+	if e < s {
 		return 0, errors.New("no value found")
-    } else if m == a[m] {
+	} else if m == a[m] {
 		return m, nil
 	} else if m < a[m] {
 		return findMagic(a, s, m-1)
 	} else if m > a[m] {
-		return findMagic(a, m+1,e)
+		return findMagic(a, m+1, e)
 	} else {
 		log.Fatal("problem ", a, m)
-        return 0, errors.New("fatal")
+		return 0, errors.New("fatal")
 	}
 }
 func midpoint(s, e int) int {
-    return (e-s)/2+s
+	return (e-s)/2 + s
 }
 
 func four() {
@@ -248,15 +249,75 @@ func validForQueen(r, c int, s [rowCount]int) bool {
 	return true
 }
 
+type box struct {
+	w, h, d int
+}
+
+func (t box) fitsOn(b box) bool {
+	return t.h < b.h && t.w < b.w && t.d < b.d
+}
+
+type byHeight []box
+
+func (b byHeight) Swap(i, j int) {
+	b[i], b[j] = b[j], b[i]
+}
+func (b byHeight) Less(i, j int) bool {
+	return b[i].h < b[j].h
+}
+func (b byHeight) Len() int {
+	return len(b)
+}
+func thirteen() {
+	one := []box{box{1, 1, 1}, box{2, 2, 2}, box{3, 3, 3}}
+	two := []box{box{2, 1, 2}, box{1, 1, 1}, box{3, 3, 3}}
+	three := []box{box{4, 4, 4}, box{2, 2, 2}, box{1, 1, 1}}
+    four:=[]box{box{1,2,1},box{2,2,2},box{3,3,3}}
+    five:=[]box{box{1,1,1},box{4,3,4},box{5,5,5},box{2,6,6}}
+	fmt.Println(calcHeight(one))
+	fmt.Println(calcHeight(two))
+	fmt.Println(calcHeight(three))
+	fmt.Println(calcHeight(four))
+	fmt.Println(calcHeight(five))
+}
+func calcHeight(boxes []box) int {
+	if len(boxes) == 0 {
+		return 0
+	} else if len(boxes) == 1 {
+		return boxes[0].h
+	}
+	sort.Sort(byHeight(boxes))
+	max := 0
+	for i := len(boxes) - 1; i >= 0; i-- {
+		height := testFit(boxes, i)
+		if height > max {
+			max = height
+		}
+	}
+	return max
+}
+func testFit(boxes []box, bottomIndex int) int {
+	height := boxes[bottomIndex].h
+	last := bottomIndex
+	for i := bottomIndex - 1; i >= 0; i-- {
+		if boxes[i].fitsOn(boxes[last]) {
+			height += boxes[i].h
+			last = i
+		}
+	}
+	return height
+}
+
 func main() {
 	//one()   // success
 	//two()   // success
-	three() // success
+	//three() // success
 	//four()  // did without recursion by noticing iterative pattern
 	//five() // see github towerOfHanoi
 	//seven()
 	//eight()
-	eleven()
+	//eleven()
 	//twelve() // see github nQueens
-	twelve()
+	//twelve()
+	thirteen()
 }
