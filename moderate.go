@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+    "math"
 	"sort"
 	"strings"
 )
@@ -291,9 +292,131 @@ func englishOnes(n int, teens bool) string {
 	return ""
 }
 
+func nine() {
+	fmt.Println((2 * 4), multiply(2, 4))
+	fmt.Println((6 * 7), multiply(6, 7))
+	fmt.Println((6 / 3), divide(6, 3))
+	fmt.Println((12 / 4), divide(12, 4))
+	fmt.Println((4 - 2), subtract(4, 2))
+	fmt.Println((12 - 1), subtract(12, 1))
+}
+func multiply(a, b int) int {
+	fmt.Println("multiply", a, b)
+	if b == 1 {
+		return a
+	}
+	t := a
+	for i := 1; i < b; i++ {
+		t += a
+	}
+	return t
+}
+func divide(a, b int) int {
+	fmt.Println("divide", a, b)
+	if a == b {
+		return 1
+	}
+	i := 1
+	t := b
+	for {
+		t += b
+		i++
+		if t == a {
+			return i
+		}
+	}
+}
+func subtract(a, b int) int {
+	fmt.Println("subtract", a, b)
+	if a == b {
+		return 0
+	}
+	i := 0
+	for {
+		b += 1
+		i++
+		if a == b {
+			return i
+		}
+	}
+}
+
+func ten() {
+	//https://play.golang.org/p/IrbvUFH_hkH
+}
+
+func thirteen() {
+	sq0, sq1 := square{point{4, 4}, point{2, 2}}, square{point{8, 8}, point{6, 6}}
+	b, l := bisect(sq0, sq1)
+	log.Print(b, l.a, l.m, l.b)
+}
+
+type point struct {
+	x, y float64
+}
+type square struct {
+	ne, sw point
+}
+
+//ay=mx+b
+type line struct {
+	a, m, b float64
+}
+
+const (
+	notBisectable = iota
+	horizontal
+	vertical
+	diagonal
+)
+
+type biType int
+
+func bisecType(sq0, sq1 square) biType {
+	if sq0.ne.x == sq1.ne.x && sq0.sw.x == sq1.sw.x {
+		return horizontal
+	} else if sq0.ne.y == sq1.ne.y && sq0.sw.y == sq0.sw.y {
+		return vertical
+	} else if math.Abs(sq0.ne.x-sq1.ne.x) == math.Abs(sq0.sw.x-sq1.sw.x) && math.Abs(sq0.ne.y-sq1.ne.y) == math.Abs(sq0.sw.y-sq1.sw.y) {
+		return diagonal
+	} else {
+		return notBisectable
+	}
+}
+func bisect(sq0, sq1 square) (bool, *line) {
+	b := bisecType(sq0, sq1)
+	if b == notBisectable {
+		return false, nil
+	}
+	line := new(line)
+	if b == horizontal {
+		line.a = 1
+		line.b = (sq0.ne.y-sq0.sw.y)/2.0 + sq0.sw.y
+		line.m = 0
+	} else if b == vertical {
+		line.a = 0
+		line.m = 1
+		line.b = -1.0*(sq0.ne.x-sq0.sw.x)/2.0 + sq0.sw.x
+	} else if b == diagonal {
+		// use the diagonal from a square to get the slope
+		line.m = (sq0.ne.y - sq0.sw.y) / (sq0.ne.x - sq0.sw.x)
+		// now figure out whether the slope is positive or negative
+		if sq1.sw.x < sq0.sw.x && sq1.sw.y > sq0.sw.y || sq1.sw.x > sq0.sw.x && sq1.sw.y < sq0.sw.y {
+			line.m = -1.0 * line.m
+		}
+		line.a = 1
+		line.b = sq0.sw.y - line.m*sq0.sw.x
+	} else {
+		log.Fatal("no dice", sq0, sq1)
+	}
+	return true, line
+}
 func main() {
 	one()
 	five()
 	six()
 	eight()
+	nine()
+	ten()
+    thirteen()
 }
