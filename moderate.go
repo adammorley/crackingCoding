@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-    "math"
+	"math"
+    "math/rand"
 	"sort"
 	"strings"
 )
@@ -411,6 +412,71 @@ func bisect(sq0, sq1 square) (bool, *line) {
 	}
 	return true, line
 }
+
+func sixteen() {
+	a := []int{1, 2, 4, 7, 10, 11, 7, 12, 6, 7, 16, 18, 19}
+	l, h := findLowHigh(a)
+	fmt.Println(l, h)
+}
+func findLowHigh(a []int) (lowI, highI int) {
+	lowI = len(a) + 1
+	v := a[0]
+	for i := 1; i < len(a); i++ {
+		if a[i] < v {
+			for j := 0; j < i; j++ {
+				if a[j] > a[i] {
+					if j < lowI {
+						lowI = j - 1
+					}
+				}
+			}
+			highI = 0
+		}
+		if a[i] > v && highI == 0 {
+			highI = i - 1
+		}
+		if a[i] > v {
+			v = a[i]
+		}
+	}
+	return
+}
+
+func twenty() {
+	words := map[string]bool{"the": true, "vie": true, "tid": true}
+	candidates := make(map[string]bool)
+	buildCandidates("", [][]rune{[]rune{'t', 'u', 'v'}, []rune{'g', 'h', 'i'}, []rune{'d', 'e', 'f'}}, 0, candidates)
+	for k, _ := range candidates {
+		if _, ok := words[k]; ok {
+			fmt.Println(k)
+		}
+	}
+	//843
+	//9224
+}
+func buildCandidates(prefix string, letters [][]rune, n int, candidates map[string]bool) {
+	if n == len(letters) {
+		return
+	}
+	var sb strings.Builder
+	var s []string
+	for _, suffix := range letters[n] {
+		sb.WriteString(prefix)
+		sb.WriteRune(suffix)
+		candidates[sb.String()] = true
+		s = append(s, sb.String())
+		sb.Reset()
+	}
+	for _, w := range s {
+		buildCandidates(w, letters, n+1, candidates)
+	}
+	return
+}
+
+func twentyThree() {
+    fmt.Println(rand7())
+}
+
 func main() {
 	one()
 	five()
@@ -418,5 +484,8 @@ func main() {
 	eight()
 	nine()
 	ten()
-    thirteen()
+	thirteen()
+	sixteen()
+	twenty()
+    twentyThree()
 }
